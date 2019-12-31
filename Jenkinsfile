@@ -9,6 +9,36 @@ pipeline {
                 archiveArtifacts artifacts: 'dist/test.zip'
             }
         }
+        stage('DeployToDev') {
+            when {
+                branch 'dev'
+            }
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'webservers_deployyser_login', usernameVariable: 'USERNAME', passwordVariable: 'USERPASS')]) {
+                    sshPublisher(
+                        failOnError: true,
+                        continueOnError: false,
+                        publishers: [
+                            sshPublisherDesc(
+                                configName: 'dev',
+                                sshCredentials: [
+                                    username: "$USERNAME",
+                                    encryptedPassphrase: "$USERPASS"
+                                ], 
+                                transfers: [
+                                    sshTransfer(
+                                        sourceFiles: 'dist/test.zip',
+                                        removePrefix: 'dist/',
+                                        remoteDirectory: '/tmp',
+                                        execCommand: 'rm -rf /var/www/* && unzip /tmp/test.zip -d /var/www'
+                                    )
+                                ]
+                            )
+                        ]
+                    )
+                }
+            }
+        }
         stage('DeployToStaging') {
             when {
                 branch 'master'

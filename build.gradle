@@ -12,14 +12,15 @@ node {
 //declare a build task
 task build
 
-//declare a task to create a zip of the app
 task zip(type: Zip) {
-	from ('.') {
-		include "*"
+   from ('.') {
+   	include '*'  
 	}
-	destinationDir(file("dist"))
-	baseName "test"
+   archiveName 'test.zip'
+   destinationDir(file('dist'))
+   baseName "test"
 }
+
 
 //declare task dependencies
 build.dependsOn zip
